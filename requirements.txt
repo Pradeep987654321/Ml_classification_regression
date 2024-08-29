@@ -1,4 +1,4 @@
-pycaret==3.0.0
+pycaret==3.0.1
 distutils
 seaborn
 matplotlib
