@@ -1,5 +1,5 @@
 setuptools
-pycaret==3.0.0
+pycaret
 seaborn
 matplotlib
 streamlit
