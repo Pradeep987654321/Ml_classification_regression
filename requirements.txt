@@ -1,5 +1,5 @@
 pycaret==3.0.0
-distutils-pytest
+distutils
 seaborn
 matplotlib
 streamlit
