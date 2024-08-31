@@ -1,5 +1,2 @@
-setuptools
 pycaret
-seaborn
-matplotlib
 streamlit
