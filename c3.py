@@ -78,6 +78,7 @@ if uploaded_file is not None:
         all_models = exp.compare_models(n_select=20)  # List top 20 models
         metrics = exp.pull()  # Pull the comparison metrics table
         st.table(data=metrics)
+        st.table(data=all_models)
         progress_bar.progress(60)
 
        
