@@ -44,7 +44,7 @@ def load_and_setup_model(data, target_column, analysis_type):
     elif analysis_type == 'Regression':
         exp = RegressionExperiment()
     
-    exp.setup(data, target=target_column, session_id=123, silent=True)
+    exp.setup(data, target=target_column, session_id=123)
     return exp
 
 if uploaded_file is not None:
