@@ -4,17 +4,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pycaret.classification import ClassificationExperiment
 from pycaret.regression import RegressionExperiment
-import logging
+from pycaret.clustering import ClusteringExperiment
+from pycaret.anomaly import AnomalyExperiment
 
 # Set up page layout
 st.set_page_config(layout="wide")
+with open("style.css") as f:
+    st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger()
 
-st.title("Machine Learning - Classification, Regression Tool")
-
+st.title("Machine Learning-Classification,Regression Tool")
 # Custom CSS for styling
 st.markdown(
     """
@@ -32,12 +31,15 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# App Title
+#st.title('Machine Learning Tool- Classification,Regression')
+
 # Step 1: Select analysis type
 st.write('<p style="font-size:24px; font-weight:bold;">Choose Analysis Type</p>', unsafe_allow_html=True)
 analysis_type = st.selectbox("Select Analysis Type", ['Classification', 'Regression'])
 
 # Step 2: Upload the dataset (CSV)
-st.write('<p style="font-size:24px; font-weight:bold;">Upload your CSV file [Note: must contain a column named "Class variable" [Predicted Column]]</p>', unsafe_allow_html=True)
+st.write('<p style="font-size:24px; font-weight:bold;">Upload your CSV file[Note:must contain a column named "Class variable"[Predicted Column]]</p>', unsafe_allow_html=True)
 uploaded_file = st.file_uploader("", type=['csv'])
 
 if uploaded_file is not None:
@@ -45,38 +47,38 @@ if uploaded_file is not None:
     progress_bar = st.progress(0)
     
     status_text.text("Loading dataset...")
-    try:
+    if uploaded_file.name.endswith('.csv'):
         data = pd.read_csv(uploaded_file)
-        st.table(data=data.head())
-        progress_bar.progress(20)
+    else:
+        data = pd.read_excel(uploaded_file)
         
-        # Ensure 'Class variable' column exists
-        if 'Class variable' not in data.columns:
-            st.error("The dataset must contain a column named 'Class variable'.")
-            st.stop()
-        
+    st.table(data=data.head())
+    progress_bar.progress(20)
+    
+    # Ensure 'Class variable' column exists
+    if 'Class variable' not in data.columns:
+        st.error("The dataset must contain a column named 'Class variable'.")
+    else:
         # Determine PyCaret experiment based on analysis type
         if analysis_type == 'Classification':
             exp = ClassificationExperiment()
+            exp.setup(data, target='Class variable', session_id=123)
+        
         elif analysis_type == 'Regression':
             exp = RegressionExperiment()
+            exp.setup(data, target='Class variable', session_id=123)
         
-        exp.setup(data, target='Class variable', session_id=123, preprocess=False)
+    
         progress_bar.progress(40)
         
         # Step 3: Model selection
         st.subheader("Model Performance Metrics")
         status_text.text("Comparing models...")
-
-        try:
-            all_models = exp.compare_models(n_select=5)  # Limit to top 5 models
-            metrics = exp.pull()  # Pull the comparison metrics table
-            st.table(data=metrics)
-            progress_bar.progress(60)
-        except Exception as e:
-            logger.error(f"Error during model comparison: {str(e)}")
-            st.error(f"Error during model comparison: {str(e)}")
-            st.stop()  # Stop execution if compare_models fails
+        
+        all_models = exp.compare_models(n_select=20)  # List top 20 models
+        metrics = exp.pull()  # Pull the comparison metrics table
+        st.table(data=metrics)
+        progress_bar.progress(60)
 
         st.subheader("Choose the Best Model")
         model_options = [str(model).split('(')[0] for model in all_models]
@@ -162,7 +164,5 @@ if uploaded_file is not None:
                 st.download_button('Download Model', f, file_name='trained_model.pkl')
             progress_bar.progress(100)
             status_text.text("Model saved successfully.")
-    except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
 else:
     st.write("Please upload a CSV file to proceed.")
