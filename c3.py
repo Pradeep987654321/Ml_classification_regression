@@ -6,14 +6,15 @@ from pycaret.classification import ClassificationExperiment
 from pycaret.regression import RegressionExperiment
 from pycaret.clustering import ClusteringExperiment
 from pycaret.anomaly import AnomalyExperiment
+from mlem.api import save, load
 
 # Set up page layout
 st.set_page_config(layout="wide")
 with open("style.css") as f:
     st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
 
+st.title("Machine Learning-Classification, Regression Tool")
 
-st.title("Machine Learning-Classification,Regression Tool")
 # Custom CSS for styling
 st.markdown(
     """
@@ -31,15 +32,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# App Title
-#st.title('Machine Learning Tool- Classification,Regression')
-
 # Step 1: Select analysis type
 st.write('<p style="font-size:24px; font-weight:bold;">Choose Analysis Type</p>', unsafe_allow_html=True)
 analysis_type = st.selectbox("Select Analysis Type", ['Classification', 'Regression'])
 
 # Step 2: Upload the dataset (CSV)
-st.write('<p style="font-size:24px; font-weight:bold;">Upload your CSV file[Note:must contain a column named "Class variable"[Predicted Column]]</p>', unsafe_allow_html=True)
+st.write('<p style="font-size:24px; font-weight:bold;">Upload your CSV file [Note: must contain a column named "Class variable" (Predicted Column)]</p>', unsafe_allow_html=True)
 uploaded_file = st.file_uploader("", type=['csv'])
 
 if uploaded_file is not None:
@@ -52,7 +50,7 @@ if uploaded_file is not None:
     else:
         data = pd.read_excel(uploaded_file)
         
-    st.table(data=data.head())
+    st.table(data.head())
     progress_bar.progress(20)
     
     # Ensure 'Class variable' column exists
@@ -68,7 +66,6 @@ if uploaded_file is not None:
             exp = RegressionExperiment()
             exp.setup(data, target='Class variable', session_id=123)
         
-    
         progress_bar.progress(40)
         
         # Step 3: Model selection
@@ -100,7 +97,7 @@ if uploaded_file is not None:
             status_text.text("Generating predictions on holdout set...")
             
             holdout_pred = exp.predict_model(selected_model)
-            st.table(data=holdout_pred.head())
+            st.table(holdout_pred.head())
             progress_bar.progress(90)
             
             # Add download option for predictions CSV file
@@ -152,16 +149,16 @@ if uploaded_file is not None:
             with open('test_predictions.csv', 'rb') as f:
                 st.download_button('Download Predictions', f, file_name='test_predictions.csv')
         
-        # Step 7: Save the model
+        # Step 7: Save the model using MLEM
         if st.button("Save the Trained Model"):
-            status_text.text("Saving the trained model...")
+            status_text.text("Saving the trained model with MLEM...")
             progress_bar = st.progress(0)
             
-            exp.save_model(selected_model, 'trained_model')
+            save(selected_model, 'trained_model')
             progress_bar.progress(80)
             
-            with open('trained_model.pkl', 'rb') as f:
-                st.download_button('Download Model', f, file_name='trained_model.pkl')
+            with open('trained_model.mlem', 'rb') as f:
+                st.download_button('Download Model', f, file_name='trained_model.mlem')
             progress_bar.progress(100)
             status_text.text("Model saved successfully.")
 else:
