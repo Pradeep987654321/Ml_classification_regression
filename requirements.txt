@@ -1,5 +1,6 @@
+mlem
 streamlit
 pandas
 matplotlib
 seaborn
-pycaret
+pycaret[full]
