@@ -25,7 +25,7 @@ if uploaded_file is not None:
 
         # Step 3: Compare models
         st.write("### Comparing Models...")
-        best_model = exp.compare_models()
+        best_model = exp.compare_models(n_select=2)
 
         # Step 4: Display the comparison metrics
         st.write("### Model Comparison Metrics")
